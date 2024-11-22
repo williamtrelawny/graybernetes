@@ -1,0 +1,5 @@
+# The chart can also contain a short plain text templates/NOTES.txt file that will be printed out after installation,
+# and when viewing the status of a release. This file is evaluated as a template, and can be used to display usage notes,
+# next steps, or any other information relevant to a release of the chart. For example, instructions could be provided
+# for connecting to a database, or accessing a web UI. Since this file is printed to STDOUT when running helm install or
+# helm status, it is recommended to keep the content brief and point to the README for greater detail.
