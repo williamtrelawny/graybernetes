@@ -1,5 +1,5 @@
 ARG VERSION
-FROM ubuntu:noble-20241118.1
+FROM ubuntu:jammy-20240911.1
 ARG VERSION
 ENV CONTAINER_VERSION=$VERSION
 # Lock below to latest version supported by Graylog
