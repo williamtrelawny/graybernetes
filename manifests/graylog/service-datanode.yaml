@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: datanode-svc
+spec:
+  ports:
+  - port: 8999
+    name: datanode-api
+  - port: 9200
+    name: datanode-data
+  - port: 9300
+    name: datanode-clstr
+  clusterIP: None
+  selector:
+    app: datanode-svc
