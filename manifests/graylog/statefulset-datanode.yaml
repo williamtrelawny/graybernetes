@@ -1,0 +1,73 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: datanode
+spec:
+  serviceName: datanode-svc
+  replicas: 3
+  selector:
+    matchLabels:
+      app: datanode-svc
+  template:
+    metadata:
+      labels:
+        app: datanode-svc
+    spec:
+      dnsPolicy: ClusterFirst
+      #dnsConfig:
+      #  searches:
+      #    - datanode-headless.graylog.svc.cluster.local
+      containers:
+      - name: datanode
+        image: graylog/graylog-datanode:6.2
+        ports:
+        - containerPort: 8999
+          name: datanode-api
+        - containerPort: 9200
+          name: datanode-data
+        - containerPort: 9300
+          name: datanode-clstr
+        env:
+        - name: GRAYLOG_DATANODE_PASSWORD_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: graylog-password-secret
+              key: password-secret
+        - name: GRAYLOG_DATANODE_OPENSEARCH_HEAP
+          value: "2g"
+        - name: GRAYLOG_DATANODE_MONGODB_URI
+          valueFrom:
+            secretKeyRef:
+              name: graylog-mongodb-graylog-graylog
+              key: connectionString.standard
+        - name: GRAYLOG_JAVA_OPTS
+          value: "-Xms512m -Xmx512m"
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: GRAYLOG_DATANODE_NODE_NAME
+          value: $(POD_NAME).datanode-svc.graylog.svc.cluster.local
+        - name: GRAYLOG_DATANODE_OPENSEARCH_DISCOVERY_SEED_HOSTS
+          value: "datanode-0.datanode-svc.graylog.svc.cluster.local,datanode-1.datanode-svc.graylog.svc.cluster.local,datanode-2.datanode-svc.graylog.svc.cluster.local"
+        resources:
+          limits:
+            cpu: "1"
+            memory: "4Gi"
+          requests:
+            cpu: "500m"
+            memory: "1Gi"
+        volumeMounts:
+        - name: datanode
+          mountPath: /var/lib/graylog-datanode
+        tty: true
+        stdin: true
+  volumeClaimTemplates:
+  - metadata:
+      name: datanode
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: "microk8s-hostpath-immediate"
+      resources:
+        requests:
+          storage: 10Gi

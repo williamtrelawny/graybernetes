@@ -1,0 +1,68 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: graylog
+spec:
+  serviceName: graylog-svc
+  replicas: 3
+  selector:
+    matchLabels:
+      app: graylog
+  template:
+    metadata:
+      labels:
+        app: graylog
+    spec:
+      containers:
+      - name: graylog
+        image: graylog/graylog-enterprise:6.2
+        ports:
+        - containerPort: 9000
+          name: graylog-api
+        env:
+        - name: GRAYLOG_PASSWORD_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: graylog-password-secret
+              key: password-secret
+        - name: GRAYLOG_ROOT_PASSWORD_SHA2
+          valueFrom:
+            secretKeyRef:
+              name: graylog-root-password
+              key: root-password
+        - name: GRAYLOG_MONGODB_URI
+          valueFrom:
+            secretKeyRef:
+              name: graylog-mongodb-graylog-graylog
+              key: connectionString.standard
+        - name: GRAYLOG_SELFSIGNED_STARTUP
+          value: "true"
+        #- name: GRAYLOG_LEADER_ELECTION_MODE
+        #  value: "automatic"
+        #- name: GRAYLOG_RUN_MIGRATIONS
+        #  value: "false"
+        #- name: GRAYLOG_EXTERNAL_URI
+        #  value:
+        - name: GRAYLOG_SERVER_JAVA_OPTS
+          value: "-Xms1g -Xmx1g"
+        resources:
+          limits:
+            cpu: "2"
+            memory: "2Gi"
+          requests:
+            cpu: "1"
+            memory: "1Gi"
+        volumeMounts:
+        - name: graylog-journal
+          mountPath: /usr/share/graylog/data/journal
+        tty: true
+        stdin: true
+  volumeClaimTemplates:
+  - metadata:
+      name: graylog-journal
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: "microk8s-hostpath-immediate"
+      resources:
+        requests:
+          storage: 1Gi
