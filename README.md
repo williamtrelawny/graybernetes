@@ -13,7 +13,13 @@ kubectl create ns graylog
 ## Install MongoDB Community Operator
 Graylog needs a MongoDB cluster. We recommend the [Official MongoDB Community Operator](https://github.com/mongodb/mongodb-kubernetes-operator/tree/master), which can be deployed following their instructions. Just make sure to install in the `graylog` namespace!
 
-To install via Helm just run:
+To install via Helm, first add the repo:
+
+```
+helm repo add mongodb https://mongodb.github.io/helm-charts
+```
+
+...then install the Operator:
 
 ```
 helm install community-operator mongodb/community-operator -n graylog
